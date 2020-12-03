@@ -1,6 +1,6 @@
 const calculator = {
-    num1: 0,
-    num2: 0,
+    num1: [],
+    num2: [],
     ans: NaN,
     op: "",
     chain: 0, //if this isnt the first operation since refresh/AC
@@ -8,8 +8,8 @@ const calculator = {
 
     allClear: function () {
         console.log('clearing');
-        this.num1 = 0;
-        this.num2 = 0;
+        this.num1 = [];
+        this.num2 = [];
         this.op = "";
         this.chain = 0;
         this.equalsFlag = 0;
@@ -31,7 +31,6 @@ let acKey = document.querySelector('#all-clear');
 let clearKey = document.querySelector('#clear');
 let backspaceKey = document.querySelector('#backspace');
 let answerKey = document.querySelector('.ans-key');
-let decimalKey = document.querySelector('.dec-key');
 
 numKeys.forEach(key => {
     key.addEventListener("click", handleNum)
@@ -49,7 +48,7 @@ acKey.addEventListener("click", function () {
 });
 
 acKey.addEventListener("click", function () {
-    calculator.num2 = 0;
+    calculator.num2 = [];
     setDisplayText(calculator.num2);
 });
 
@@ -63,13 +62,11 @@ answerKey.addEventListener("click", function () {
     }
 });
 
-decimalKey.addEventListener("click", handleDecimal);
 
 /***************************** listener callbacks *****************************/
 
 //when another number is entered, num = num*10+newNum.
 function handleNum(e) {
-    console.log(e);
 
     //handle user typing numbers in directly after using the = sign
     if (calculator.equalsFlag) {
@@ -77,9 +74,11 @@ function handleNum(e) {
         allClear();
     }
 
-    let newNum = parseInt(e.target.getAttribute("data-key"));
-    calculator.num2 = calculator.num2 * 10 + newNum;
-    setDisplayText(calculator.num2);
+    let newNum = e.target.getAttribute("data-key");
+    if(newNum != "." || calculator.num2.indexOf(".") == -1) {
+        calculator.num2.push(newNum);
+        setDisplayText(calculator.num2);
+    }
 }
 
 //when operator pressed, put num2 into num1, reset num2; chain=1; op=input;
@@ -98,7 +97,7 @@ function handleOp(e) {
         if (!calculator.equalsFlag) {
             calculator.num1 = calculator.num2;
         }
-        calculator.num2 = 0;
+        calculator.num2 = [];
         calculator.equalsFlag = 0;
         calculator.chain = 1;
         calculator.op = e.target.getAttribute("data-key");
@@ -123,32 +122,23 @@ function handleOperate() {
 }
 
 function handleBackspace() {
-    let numToArr = convertToArray(calculator.num2);
-    numToArr.pop();
-    calculator.num2 = parseFloat(numToArr.join(''));
-    if (!calculator.num2) {
-        console.log("NaN FOUND");
-        calculator.num2 = 0;
-    }
-
+    calculator.num2.pop();
     setDisplayText(calculator.num2);
 }
 
-function handleDecimal() {
-    let numToArr = convertToArray(calculator.num2);
-    //if decimal already exist, do nothing
-    if (numToArr.indexOf('.')===-1) {
-        numToArr.push('.');
-        calculator.num2 = parseFloat(numToArr.join(''));
-        setDisplayText(calculator.num2+".");
-    }
-}
+
 
 
 /************************************** UI ***************************************/
 function setDisplayText(num) {
     let display = document.querySelector("#calculator-display");
-    display.textContent = num;
+    console.log(num);
+    if(num.length < 1) {
+        display.textContent = 0;
+        return 0;
+    }
+    display.textContent = num.join('');
+    return 1;
 }
 
 function setDisplayColor(op) {
@@ -192,7 +182,10 @@ function allClear() {
     setDisplayColor('=');
 }
 
-function operate(a, b, op) {
+function operate(num1, num2, op) {
+    let a=parseFloat(num1.join(''));
+    let b=parseFloat(num2.join(''));
+
     console.log(`${a} ${op} ${b} = `)
     let result;
     switch (op) {
@@ -217,7 +210,7 @@ function operate(a, b, op) {
             break;
     }
     console.log(result);
-    return result;
+    return convertToArray(result);
 }
 
 
