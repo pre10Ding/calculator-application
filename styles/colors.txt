@@ -1,0 +1,30 @@
+								<div title="#113c4c" style="background-color: rgb(17, 60, 76); border-color: red;"><span></span></div>
+								<div title="#15244d" style="background-color: rgb(21, 36, 77);"><span></span></div>
+								<div title="#8748ca" style="background-color: rgb(135, 72, 202);"><span></span></div>
+								<div title="#699cd1" style="background-color: rgb(105, 156, 209);"><span></span></div>
+								<div title="#bb60c7" style="background-color: rgb(187, 96, 199);"><span></span></div>
+								<div title="#5d5fce" style="background-color: rgb(93, 95, 206);"><span></span></div>
+								<div title="#f5fe0f" style="background-color: rgb(245, 254, 15);"><span></span></div>
+
+
+                                red b64644
+
+                                neonblue bdf7f9 51bfda
+
+                                yellow fef900
+
+                                cyan 00ffd1
+
+                                red fe0154
+
+                                black 010010
+
+
+
+
+
+                                e0fe42 yellow
+                                fd00fe pink
+                                7700a8 pueple
+                                00b3ff cyan
+                                0016ed blue

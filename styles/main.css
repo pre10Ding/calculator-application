@@ -1,0 +1,16 @@
+#calculator-wrapper {
+    display:grid;
+    width: 180px;
+}
+
+#calculator-display {
+    text-align:right;
+    border:solid lightblue;
+    height:20px;
+}
+
+#keyboard-wrapper {
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
