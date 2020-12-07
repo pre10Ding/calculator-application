@@ -1,13 +1,45 @@
+body{
+    background-color: #000000;
+}
+
+
+#nixie-display {
+    display: grid;
+    grid-template-columns: repeat(13, 70px);
+    font-family: 'Exo', sans-serif;
+}
+
+.nixie-tube {
+    display: grid;
+}
+
+.nixie-tube-num {
+    font-size: 92px;
+    font-family: 'Exo', sans-serif;
+    color:#ff7b63;
+    position: relative;
+    top:37px;
+    left:15px;
+    text-align:center;
+    opacity: .8;
+}
+
+
+
 #calculator-wrapper {
     display:grid;
     width: 180px;
+    top:300px;
+    position: relative
 }
-
 #calculator-display {
+
     text-align:right;
     border:solid lightblue;
     height:20px;
+    color: white;
 }
+
 
 #keyboard-wrapper {
     display:grid;
