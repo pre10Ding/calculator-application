@@ -1,3 +1,4 @@
+//calculator logic object
 const calculator = {
     num1: [],
     num2: [],
@@ -18,7 +19,96 @@ const calculator = {
 
 }
 
-let defaultColor = 'white';
+//nixie tube variables
+const nixieB = 'images/nixieBG.png';
+const nixieBOpacity = 0.08;
+const nixieL = 'images/nixieL.png';
+const nixieR = 'images/nixieR.png';
+const nixieLROpacity = 0.3;
+const nixieOn = 'images/nixieOn.png';
+const nixieOnOpacity = 0.5;
+const nixieOff = 'images/nixieOff.png';
+const nixieOffOpacity = 0.2;
+const nixieLayerSaturation = 2;
+const displaySize = 13;
+
+const defaultColor = 'black';
+let nixieDisplay = document.querySelector('#nixie-display');
+
+makeNixieDisplay();
+
+function makeNixieDisplay() {
+
+
+    for (let i = 0; i < displaySize; i++) {
+
+        //make the nixie tube back drop
+        let nixieDiv = document.createElement('div');
+        nixieDiv.setAttribute("class", "nixie-tube");
+        makeNixieOff(nixieDiv);
+
+        //make a span to put the number in
+        let nixieText = document.createElement('span');
+        nixieText.setAttribute("class", "nixie-tube-num");
+        nixieDiv.appendChild(nixieText);
+
+        nixieDisplay.appendChild(nixieDiv);
+    }
+}
+
+function eraseNixieDisplay() {
+    nixieDisplay.querySelectorAll('*').forEach(n => n.remove());
+}
+
+//get these nixie-tube divs into an array
+//somehow append numbers from the last digit to the last div until there is no more
+
+function displayInNixie(numArray) {
+
+    //erase all bg to nixieOff
+    eraseNixieDisplay();
+    makeNixieDisplay();
+
+    let nixieTubeNums = [...document.querySelectorAll(".nixie-tube-num")];
+    //reverse the list of elements so we can append from the tail end
+    nixieTubeNums.reverse();
+    let reversedNum = Array.from(numArray);
+    reversedNum.reverse();
+
+    let i = 0;
+    for (i; i < reversedNum.length; i++) {
+        nixieTubeNums[i].textContent = reversedNum[i];
+        console.log(reversedNum[i]);
+        //turn on all bg to nixieOn
+        let nixieParent = nixieTubeNums[i].parentNode;
+
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+        
+        makeNixieOn(nixieParent);
+
+    }
+
+
+    //turn the nixie left of the biggest digit to nixieOffR
+    //create this reflection effect
+    let nixieParent = nixieTubeNums[i].parentNode;
+
+    nixieParent.removeChild(nixieParent.childNodes[0]);
+    nixieParent.removeChild(nixieParent.childNodes[0]);
+    
+    makeNixieOffR(nixieParent);
+
+
+
+}
+
+
+
+
+
+
+
 
 //wait for num input.
 //display this
@@ -45,11 +135,15 @@ operateKey.addEventListener("click", handleOperate)
 acKey.addEventListener("click", function () {
     allClear();
     setDisplayText(calculator.num2);
+    displayInNixie(calculator.num2);
+
 });
 
 acKey.addEventListener("click", function () {
     calculator.num2 = [];
     setDisplayText(calculator.num2);
+    displayInNixie(calculator.num2);
+
 });
 
 backspaceKey.addEventListener("click", handleBackspace);
@@ -59,8 +153,16 @@ answerKey.addEventListener("click", function () {
     if (calculator.ans) {
         calculator.num2 = calculator.ans;
         setDisplayText(calculator.num2);
+        displayInNixie(calculator.num2);
+
     }
 });
+
+
+
+
+
+
 
 
 /***************************** listener callbacks *****************************/
@@ -71,12 +173,16 @@ function handleNum(e) {
     //handle user typing numbers in directly after using the = sign
     if (calculator.equalsFlag) {
         calculator.equalsFlag = 0;
-        allClear();
+        allClear(); //erase all data
     }
 
     let newNum = e.target.getAttribute("data-key");
-    if(newNum != "." || calculator.num2.indexOf(".") == -1) {
+
+    //check if a decimal already exist in the array; if so, do nothing
+    if (calculator.num2.length < 12 && (newNum != "." || calculator.num2.indexOf(".") == -1)) {
         calculator.num2.push(newNum);
+        displayInNixie(calculator.num2);
+
         setDisplayText(calculator.num2);
     }
 }
@@ -85,45 +191,77 @@ function handleNum(e) {
 function handleOp(e) {
     console.log(e);
 
-    //if an operator was pressed instead of =, do =, then do op
+
+
+    //if an operator was pressed instead of =
     if (calculator.chain) {
-        handleOperate(); //do the operation
-        handleOp(e); //add the op sign again
+        //if the user spams op buttons, swap it to the latest one
+        if (calculator.num2.length === 0) {
+            calculator.op = e.target.getAttribute("data-key");
+
+            //this will probably get repurposed into the nixie tube displays...
+            setDisplayColor(calculator.op);
+
+        }
+
+        //if legit chain, do =, then do op
+        else {
+            handleOperate(); //do the operation
+            handleOp(e); //add the op sign again
+        }
     }
 
     else {
         //normal case (shift num2 to num1)
         //if an operator was NOT pressed immediately after =
         if (!calculator.equalsFlag) {
+            //in case the user pressed an OP without inputting a number
+            if (calculator.num2.length === 0) {
+                calculator.num2.push(0);
+            }
+            //swap nums to store num2 as operand
             calculator.num1 = calculator.num2;
         }
+        //clear num2 to reuse as input storage
         calculator.num2 = [];
+        //reset equals flag since its not the last key pressed anymore
         calculator.equalsFlag = 0;
+        //raises chain flag in case the user presses an op key again without pressing =
         calculator.chain = 1;
+        //set op
         calculator.op = e.target.getAttribute("data-key");
 
+        //this will probably get repurposed into the nixie tube displays...
         setDisplayColor(calculator.op);
     }
 }
 
 function handleOperate() {
-    if (calculator.op != "") {
+    if (calculator.op != "" && calculator.num2.length !== 0) {
         calculator.ans = operate(calculator.num1, calculator.num2, calculator.op);
         setDisplayText(calculator.ans);
+        displayInNixie(calculator.ans);
 
-        //setup for next round of calculations
+        //setup for next round of calculations in case user presses an op right away 
         calculator.equalsFlag = 1;
         calculator.num1 = calculator.ans;
+
+        //resets chain ops
         calculator.chain = 0;
 
+        //this will probably get repurposed into the nixie tube displays...
         setDisplayColor('=');
     }
 
 }
 
 function handleBackspace() {
-    calculator.num2.pop();
-    setDisplayText(calculator.num2);
+    if (calculator.equalsFlag === 0) {
+        calculator.num2.pop();
+        displayInNixie(calculator.num2);
+
+        setDisplayText(calculator.num2);
+    }
 }
 
 
@@ -133,7 +271,7 @@ function handleBackspace() {
 function setDisplayText(num) {
     let display = document.querySelector("#calculator-display");
     console.log(num);
-    if(num.length < 1) {
+    if (num.length < 1) {
         display.textContent = 0;
         return 0;
     }
@@ -183,8 +321,8 @@ function allClear() {
 }
 
 function operate(num1, num2, op) {
-    let a=parseFloat(num1.join(''));
-    let b=parseFloat(num2.join(''));
+    let a = parseFloat(num1.join(''));
+    let b = parseFloat(num2.join(''));
 
     console.log(`${a} ${op} ${b} = `)
     let result;
@@ -210,6 +348,29 @@ function operate(num1, num2, op) {
             break;
     }
     console.log(result);
+    let resultArray = convertToArray(result);
+    console.log(resultArray);
+    if (resultArray.length > 12) {
+        //if scientific notation in result, round to displaySize - 6 (since 1 is reserved for op)
+        if (resultArray.indexOf('e' != -1)) {
+            result = result.toPrecision(displaySize - 6);
+            console.log(displaySize - 5);
+        }
+        //if no decimal in result, round to displaySize - 1 (since 1 is reserved for op)
+        else if (resultArray.indexOf('.') == -1) {
+            result = result.toPrecision(displaySize - 1);
+            console.log(displaySize);
+
+        }
+        //if decimal in result, round to displaySize - 2 (since 1 is reserved for op)
+        else {
+            result = result.toPrecision(displaySize - 2);
+            console.log(displaySize - 1);
+        }
+        console.log(result);
+    }
+
+    //if decimal in result, round to displaySize -1 
     return convertToArray(result);
 }
 
@@ -229,4 +390,43 @@ function multiply(a, b) {
 
 function divide(a, b) {
     return a / b;
+}
+
+/********************************** Nixie Tube *******************************/
+
+
+function makeNixieOff(ele) {
+    makeNixieLayer(ele, nixieB, nixieBOpacity);
+    makeNixieLayer(ele, nixieOff, nixieOffOpacity);
+}
+
+function makeNixieOffR(ele) {
+    makeNixieLayer(ele, nixieB, nixieBOpacity);
+    makeNixieLayer(ele, nixieR, nixieLROpacity);
+    makeNixieLayer(ele, nixieOff, nixieOffOpacity);
+}
+
+function makeNixieOffL(ele) {
+    makeNixieLayer(ele, nixieB, nixieBOpacity);
+    makeNixieLayer(ele, nixieL, nixieLROpacity);
+    makeNixieLayer(ele, nixieOff, nixieOffOpacity);
+}
+
+function makeNixieOn(ele) {
+    makeNixieLayer(ele, nixieB, nixieBOpacity);
+    makeNixieLayer(ele, nixieL, nixieLROpacity);
+    makeNixieLayer(ele, nixieR, nixieLROpacity);
+    makeNixieLayer(ele, nixieOn, nixieOnOpacity);
+}
+
+
+
+function makeNixieLayer(ele, path, opacity) {
+    let img1 = document.createElement("img");
+    img1.setAttribute("src", path);
+    img1.style.width = "100px";
+    img1.style.position = 'absolute';
+    img1.style.opacity = opacity; // ~GIMP value * 10 to 15
+    img1.style.filter = `saturate(${nixieLayerSaturation})`; //2 seems about right
+    ele.appendChild(img1);
 }
