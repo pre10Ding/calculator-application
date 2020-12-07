@@ -6,12 +6,20 @@
     <title>Calculator</title>
     <meta charset="UTF-8" />
     <link rel="stylesheet" type="text/css" href="styles/reset.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@100&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="styles/main.css">
+
 
 </head>
 
 <body>
+    <div id=nixie-display></div>
+
+
+
     <div id=calculator-wrapper>
+
         <div id=calculator-display>0</div>
         <div id=keyboard-wrapper>
 
@@ -21,37 +29,37 @@
             <button id=backspace class="keys del-keys" data-key="backspace">⌫</button>
 
 
-            <button id=seven class="keys num-keys"  data-key="7">7</button>
-            <button id=eight class="keys num-keys"  data-key="8">8</button>
-            <button id=nine class="keys num-keys"  data-key="9">9</button>
-            <button id=buttonide class="keys op-keys"  data-key="/">÷</button>
+            <button id=seven class="keys num-keys" data-key="7">7</button>
+            <button id=eight class="keys num-keys" data-key="8">8</button>
+            <button id=nine class="keys num-keys" data-key="9">9</button>
+            <button id=buttonide class="keys op-keys" data-key="/">÷</button>
 
 
-            <button id=four class="keys num-keys"  data-key="4">4</button>
-            <button id=five class="keys num-keys"  data-key="5">5</button>
-            <button id=six class="keys num-keys"  data-key="6">6</button>
-            <button id=multiply class="keys op-keys"  data-key="*">x</button>
+            <button id=four class="keys num-keys" data-key="4">4</button>
+            <button id=five class="keys num-keys" data-key="5">5</button>
+            <button id=six class="keys num-keys" data-key="6">6</button>
+            <button id=multiply class="keys op-keys" data-key="*">x</button>
 
 
             <button id=one class="keys num-keys" data-key="1">1</button>
-            <button id=two class="keys num-keys"  data-key="2">2</button>
-            <button id=three class="keys num-keys"  data-key="3">3</button>
-            <button id=subtract class="keys op-keys"  data-key="-">-</button>
+            <button id=two class="keys num-keys" data-key="2">2</button>
+            <button id=three class="keys num-keys" data-key="3">3</button>
+            <button id=subtract class="keys op-keys" data-key="-">-</button>
 
 
             <button id=zero class="keys num-keys" data-key="0">0</button>
-            <button id=decimal class="keys num-keys"  data-key=".">.</button>
+            <button id=decimal class="keys num-keys" data-key=".">.</button>
             <button id=operate class="keys operate-key" data-key="=">=</button>
             <button id=add class="keys op-keys" data-key="+">+</button>
 
 
 
 
-
         </div>
 
+
         <br>
-<!--
+        <!--
         <div title="#113c4c" style="background-color: rgb(17, 60, 76);"><span>--</span></div>
         <div title="#15244d" style="background-color: rgb(21, 36, 77);"><span>--</span></div>
         <div title="#8748ca" style="background-color: rgb(135, 72, 202);"><span>--</span></div>
