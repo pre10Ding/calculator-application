@@ -43,6 +43,8 @@ let acKey = document.querySelector('#all-clear');
 let clearKey = document.querySelector('#clear');
 let backspaceKey = document.querySelector('#backspace');
 let answerKey = document.querySelector('.ans-key');
+let negKey = document.querySelector('#negation');
+
 
 //initialize nixie display
 let nixieDisplay = document.querySelector('#nixie-display');
@@ -67,9 +69,11 @@ backspaceKey.addEventListener("click", handleBackspace);
 
 answerKey.addEventListener("click", handleAns);
 
+negKey.addEventListener("click", handleNeg);
 
 
 
+displayInNixie([0]);
 
 
 
@@ -87,8 +91,18 @@ function handleNum(e) {
 
     let newNum = e.target.getAttribute("data-key");
 
+    //check if array is empty and the first entry is zero, ignore it
+    if(calculator.num2.length < 1){
+        if (newNum == 0) {
+            return 0;
+        }
+        if (newNum == ".") {
+            calculator.num2.push('0');
+        }
+    }
     //check if a decimal already exist in the array; if so, do nothing
-    if (calculator.num2.length < 12 && (newNum != "." || calculator.num2.indexOf(".") == -1)) {
+    if (calculator.num2.length < displaySize-2 && (newNum != "." || calculator.num2.indexOf(".") == -1)) {
+
         calculator.num2.push(newNum);
         displayInNixie(calculator.num2);
 
@@ -98,8 +112,7 @@ function handleNum(e) {
 
 //when operator pressed, put num2 into num1, reset num2; chain=1; op=input;
 function handleOp(e) {
-    console.log(e);
-
+    //console.log(e);
 
 
     //if an operator was pressed instead of =
@@ -135,13 +148,15 @@ function handleOp(e) {
         calculator.num2 = [];
         //reset equals flag since its not the last key pressed anymore
         calculator.equalsFlag = 0;
-        //raises chain flag in case the user presses an op key again without pressing =
-        calculator.chain = 1;
         //set op
         calculator.op = e.target.getAttribute("data-key");
+        setDisplayColor(calculator.op);
+
+        //raises chain flag in case the user presses an op key again without pressing =
+        calculator.chain = 1;
+
 
         //this will probably get repurposed into the nixie tube displays...
-        setDisplayColor(calculator.op);
     }
 
     //change the left most nixie to show op entered
@@ -170,13 +185,15 @@ function handleOperate() {
 function handleAC() {
     allClear();
     setDisplayText(calculator.num2);
-    displayInNixie(calculator.num2);
+    displayInNixie([0]);
+
 }
 
 function handleC() {
     calculator.num2 = [];
     setDisplayText(calculator.num2);
-    displayInNixie(calculator.num2);
+    displayInNixie([0]);
+
 
 }
 
@@ -200,13 +217,51 @@ function handleAns() {
     }
 }
 
+//negation
+//convert num2 into int then * -1
+//do precision on it for displaySize -1
+//convert back to array, store in num2, displayNixie
 
+function handleNeg() {
+    if (calculator.equalsFlag) {
+        let a = negateNum(calculator.num1);
+        if(isNaN(a)) {
+            return 0;
+        }
+        calculator.num1 = convertToArray(a);
+        //console.log(calculator.num1);
+
+        displayInNixie(calculator.num1);
+    }
+    else {
+        let a = negateNum(calculator.num2);
+        if(isNaN(a)) {
+            return 0;
+        }
+        calculator.num2 = convertToArray(a);
+        //console.log(calculator.num2);
+
+        displayInNixie(calculator.num2);
+    }
+
+}
+
+function negateNum(target) {
+    let a = parseFloat(target.join(''));
+    //console.log(target.join(''));
+    //console.log(a);
+    a = a * (-1);
+    
+    //console.log(a);
+    a = checkDisplaySize(a);
+    return a;
+}
 
 /************************************** UI ***************************************/
 //this may get refactored into displayInNixie(num)
 function setDisplayText(num) {
     let display = document.querySelector("#calculator-display");
-    console.log(num);
+    //console.log(num);
     if (num.length < 1) {
         display.textContent = 0;
         return 0;
@@ -217,6 +272,7 @@ function setDisplayText(num) {
 
 //this may get refactored into just displayOps(op)
 function setDisplayColor(op) {
+
     let display = document.querySelector("#calculator-display");
     let color;
     switch (op) {
@@ -261,10 +317,10 @@ function allClear() {
 }
 
 function operate(num1, num2, op) {
+
     let a = parseFloat(num1.join(''));
     let b = parseFloat(num2.join(''));
 
-    console.log(`${a} ${op} ${b} = `)
     let result;
     switch (op) {
         case '+':
@@ -287,33 +343,35 @@ function operate(num1, num2, op) {
             return '???';
             break;
     }
-    console.log(result);
+    console.log(`${a} ${op} ${b} = ${result}`)
+    result = checkDisplaySize(result);
+    return convertToArray(result);
+}
+
+function checkDisplaySize(result) {
     let resultArray = convertToArray(result);
-    console.log(resultArray);
+    //console.log(resultArray);
     if (resultArray.length > 12) {
         //if scientific notation in result, round to displaySize - 6 (since 1 is reserved for op)
         if (resultArray.indexOf('e' != -1)) {
             result = result.toPrecision(displaySize - 7);
-            console.log(displaySize - 5);
+            //console.log(displaySize - 5);
         }
         //if no decimal in result, round to displaySize - 1 (since 1 is reserved for op)
-        else if (resultArray.indexOf('.') == -1) {
+        else if (resultArray.indexOf('.') == -2) {
             result = result.toPrecision(displaySize - 2);
-            console.log(displaySize);
+            //console.log(displaySize);
 
         }
         //if decimal in result, round to displaySize - 2 (since 1 is reserved for op)
         else {
             result = result.toPrecision(displaySize - 3);
-            console.log(displaySize - 1);
+            //console.log(displaySize - 1);
         }
-        console.log(result);
+        //console.log(result);
     }
-
-    //if decimal in result, round to displaySize -1 
-    return convertToArray(result);
+    return result;
 }
-
 
 /********************************** arithmetic ********************************/
 function add(a, b) {
@@ -364,6 +422,7 @@ function makeNixieOn(ele) {
 function makeNixieLayer(ele, path, opacity) {
     let img1 = document.createElement("img");
     img1.setAttribute("src", path);
+    img1.setAttribute("class", "nixie-images");
     img1.style.width = "100px";
     img1.style.position = 'absolute';
     img1.style.opacity = opacity; // ~GIMP value * 10 to 15
@@ -413,23 +472,21 @@ function displayOp(op) {
             break;
     }
     nixieTubeNums[0].textContent = op; //update the op symbol
-
     //if use is spamming ops, just update the nixie bg once
     if (!calculator.chain) {
+
         //test if num2 has max digits, if not turn on the 2nd nixie as well
-        if (calculator.num2.length < displaySize-1) {
+        if (calculator.num2.length < displaySize - 1) {
             let nixieParent = nixieTubeNums[1].parentNode;
 
-            nixieParent.removeChild(nixieParent.childNodes[0]);
-            nixieParent.removeChild(nixieParent.childNodes[0]);
+            eraseNixieElements(nixieParent)
 
             makeNixieOffL(nixieParent);
         }
 
         let nixieParent = nixieTubeNums[0].parentNode;
 
-        nixieParent.removeChild(nixieParent.childNodes[0]);
-        nixieParent.removeChild(nixieParent.childNodes[0]);
+        eraseNixieElements(nixieParent)
 
         makeNixieOn(nixieParent);
     }
@@ -446,16 +503,15 @@ function displayInNixie(numArray) {
     nixieTubeNums.reverse();
     let reversedNum = Array.from(numArray);
     reversedNum.reverse();
-
     let i = 0;
     for (i; i < reversedNum.length; i++) {
         nixieTubeNums[i].textContent = reversedNum[i];
-        console.log(reversedNum[i]);
+        //console.log(reversedNum[i]);
         //turn on all bg to nixieOn
         let nixieParent = nixieTubeNums[i].parentNode;
 
-        nixieParent.removeChild(nixieParent.childNodes[0]);
-        nixieParent.removeChild(nixieParent.childNodes[0]);
+        eraseNixieElements(nixieParent);
+
 
         makeNixieOn(nixieParent);
 
@@ -467,11 +523,18 @@ function displayInNixie(numArray) {
     if (i !== 0 && i < displaySize) {
         let nixieParent = nixieTubeNums[i].parentNode;
 
-        nixieParent.removeChild(nixieParent.childNodes[0]);
-        nixieParent.removeChild(nixieParent.childNodes[0]);
+        eraseNixieElements(nixieParent);
 
         makeNixieOffR(nixieParent);
     }
 
 
+}
+
+function eraseNixieElements(nixieParent) {
+    let nixieImages = nixieParent.querySelectorAll(".nixie-images");
+
+    Array.prototype.forEach.call(nixieImages, function (node) {
+        node.parentNode.removeChild(node);
+    });
 }
