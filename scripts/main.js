@@ -32,7 +32,7 @@ const nixieOffOpacity = 0.2;
 const nixieLayerSaturation = 2;
 const displaySize = 13;
 
-const defaultColor = 'black';
+const defaultColor = '#010010';
 
 
 let numKeys = document.querySelectorAll('.num-keys');
@@ -293,18 +293,18 @@ function operate(num1, num2, op) {
     if (resultArray.length > 12) {
         //if scientific notation in result, round to displaySize - 6 (since 1 is reserved for op)
         if (resultArray.indexOf('e' != -1)) {
-            result = result.toPrecision(displaySize - 6);
+            result = result.toPrecision(displaySize - 7);
             console.log(displaySize - 5);
         }
         //if no decimal in result, round to displaySize - 1 (since 1 is reserved for op)
         else if (resultArray.indexOf('.') == -1) {
-            result = result.toPrecision(displaySize - 1);
+            result = result.toPrecision(displaySize - 2);
             console.log(displaySize);
 
         }
         //if decimal in result, round to displaySize - 2 (since 1 is reserved for op)
         else {
-            result = result.toPrecision(displaySize - 2);
+            result = result.toPrecision(displaySize - 3);
             console.log(displaySize - 1);
         }
         console.log(result);
@@ -400,7 +400,6 @@ function eraseNixieDisplay() {
 
 function displayOp(op) {
     let nixieTubeNums = [...document.querySelectorAll(".nixie-tube-num")];
-    //test if num2 has max digits, if not turn on the 2nd nixie as well
 
     switch (op) {
         case '*':
@@ -417,7 +416,8 @@ function displayOp(op) {
 
     //if use is spamming ops, just update the nixie bg once
     if (!calculator.chain) {
-        if (calculator.num2.length < 12) {
+        //test if num2 has max digits, if not turn on the 2nd nixie as well
+        if (calculator.num2.length < displaySize-1) {
             let nixieParent = nixieTubeNums[1].parentNode;
 
             nixieParent.removeChild(nixieParent.childNodes[0]);
