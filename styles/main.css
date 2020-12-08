@@ -119,6 +119,9 @@ body{
 #decimal {
     grid-area: 4/2/5/3;
 }
+#negation {
+    grid-area: 4/3/5/4;
+}
 
 #buttonide {
     grid-area: 2/6/3/7;
