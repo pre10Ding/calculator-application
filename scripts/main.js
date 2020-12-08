@@ -33,85 +33,7 @@ const nixieLayerSaturation = 2;
 const displaySize = 13;
 
 const defaultColor = 'black';
-let nixieDisplay = document.querySelector('#nixie-display');
 
-makeNixieDisplay();
-
-function makeNixieDisplay() {
-
-
-    for (let i = 0; i < displaySize; i++) {
-
-        //make the nixie tube back drop
-        let nixieDiv = document.createElement('div');
-        nixieDiv.setAttribute("class", "nixie-tube");
-        makeNixieOff(nixieDiv);
-
-        //make a span to put the number in
-        let nixieText = document.createElement('span');
-        nixieText.setAttribute("class", "nixie-tube-num");
-        nixieDiv.appendChild(nixieText);
-
-        nixieDisplay.appendChild(nixieDiv);
-    }
-}
-
-function eraseNixieDisplay() {
-    nixieDisplay.querySelectorAll('*').forEach(n => n.remove());
-}
-
-//get these nixie-tube divs into an array
-//somehow append numbers from the last digit to the last div until there is no more
-
-function displayInNixie(numArray) {
-
-    //erase all bg to nixieOff
-    eraseNixieDisplay();
-    makeNixieDisplay();
-
-    let nixieTubeNums = [...document.querySelectorAll(".nixie-tube-num")];
-    //reverse the list of elements so we can append from the tail end
-    nixieTubeNums.reverse();
-    let reversedNum = Array.from(numArray);
-    reversedNum.reverse();
-
-    let i = 0;
-    for (i; i < reversedNum.length; i++) {
-        nixieTubeNums[i].textContent = reversedNum[i];
-        console.log(reversedNum[i]);
-        //turn on all bg to nixieOn
-        let nixieParent = nixieTubeNums[i].parentNode;
-
-        nixieParent.removeChild(nixieParent.childNodes[0]);
-        nixieParent.removeChild(nixieParent.childNodes[0]);
-        
-        makeNixieOn(nixieParent);
-
-    }
-
-
-    //turn the nixie left of the biggest digit to nixieOffR
-    //create this reflection effect
-    let nixieParent = nixieTubeNums[i].parentNode;
-
-    nixieParent.removeChild(nixieParent.childNodes[0]);
-    nixieParent.removeChild(nixieParent.childNodes[0]);
-    
-    makeNixieOffR(nixieParent);
-
-
-
-}
-
-
-
-
-
-
-
-
-//wait for num input.
-//display this
 
 let numKeys = document.querySelectorAll('.num-keys');
 let opKeys = document.querySelectorAll('.op-keys');
@@ -122,6 +44,11 @@ let clearKey = document.querySelector('#clear');
 let backspaceKey = document.querySelector('#backspace');
 let answerKey = document.querySelector('.ans-key');
 
+//initialize nixie display
+let nixieDisplay = document.querySelector('#nixie-display');
+makeNixieDisplay();
+
+//initialize listeners
 numKeys.forEach(key => {
     key.addEventListener("click", handleNum)
 });
@@ -132,31 +59,13 @@ opKeys.forEach(key => {
 
 operateKey.addEventListener("click", handleOperate)
 
-acKey.addEventListener("click", function () {
-    allClear();
-    setDisplayText(calculator.num2);
-    displayInNixie(calculator.num2);
+acKey.addEventListener("click", handleAC);
 
-});
-
-acKey.addEventListener("click", function () {
-    calculator.num2 = [];
-    setDisplayText(calculator.num2);
-    displayInNixie(calculator.num2);
-
-});
+clearKey.addEventListener("click", handleC);
 
 backspaceKey.addEventListener("click", handleBackspace);
 
-answerKey.addEventListener("click", function () {
-    //if there is an answer to draw from, change the cur num to it, else do nothing
-    if (calculator.ans) {
-        calculator.num2 = calculator.ans;
-        setDisplayText(calculator.num2);
-        displayInNixie(calculator.num2);
-
-    }
-});
+answerKey.addEventListener("click", handleAns);
 
 
 
@@ -234,6 +143,9 @@ function handleOp(e) {
         //this will probably get repurposed into the nixie tube displays...
         setDisplayColor(calculator.op);
     }
+
+    //change the left most nixie to show op entered
+
 }
 
 function handleOperate() {
@@ -255,6 +167,20 @@ function handleOperate() {
 
 }
 
+function handleAC() {
+    allClear();
+    setDisplayText(calculator.num2);
+    displayInNixie(calculator.num2);
+}
+
+function handleC() {
+    calculator.num2 = [];
+    setDisplayText(calculator.num2);
+    displayInNixie(calculator.num2);
+
+}
+
+
 function handleBackspace() {
     if (calculator.equalsFlag === 0) {
         calculator.num2.pop();
@@ -264,10 +190,20 @@ function handleBackspace() {
     }
 }
 
+function handleAns() {
+    //if there is an answer to draw from, change the cur num to it, else do nothing
+    if (calculator.ans) {
+        calculator.num2 = calculator.ans;
+        setDisplayText(calculator.num2);
+        displayInNixie(calculator.num2);
+
+    }
+}
 
 
 
 /************************************** UI ***************************************/
+//this may get refactored into displayInNixie(num)
 function setDisplayText(num) {
     let display = document.querySelector("#calculator-display");
     console.log(num);
@@ -279,6 +215,7 @@ function setDisplayText(num) {
     return 1;
 }
 
+//this may get refactored into just displayOps(op)
 function setDisplayColor(op) {
     let display = document.querySelector("#calculator-display");
     let color;
@@ -307,6 +244,9 @@ function setDisplayColor(op) {
             break;
     }
     display.style.backgroundColor = color;
+
+    displayOp(op);
+
 }
 
 
@@ -429,4 +369,109 @@ function makeNixieLayer(ele, path, opacity) {
     img1.style.opacity = opacity; // ~GIMP value * 10 to 15
     img1.style.filter = `saturate(${nixieLayerSaturation})`; //2 seems about right
     ele.appendChild(img1);
+}
+
+
+function makeNixieDisplay() {
+
+
+    for (let i = 0; i < displaySize; i++) {
+
+        //make the nixie tube back drop
+        let nixieDiv = document.createElement('div');
+        nixieDiv.setAttribute("class", "nixie-tube");
+        makeNixieOff(nixieDiv);
+
+        //make a span to put the number in
+        let nixieText = document.createElement('span');
+        nixieText.setAttribute("class", "nixie-tube-num");
+        nixieDiv.appendChild(nixieText);
+
+        nixieDisplay.appendChild(nixieDiv);
+    }
+}
+
+function eraseNixieDisplay() {
+    nixieDisplay.querySelectorAll('*').forEach(n => n.remove());
+}
+
+//get these nixie-tube divs into an array
+//somehow append numbers from the last digit to the last div until there is no more
+
+function displayOp(op) {
+    let nixieTubeNums = [...document.querySelectorAll(".nixie-tube-num")];
+    //test if num2 has max digits, if not turn on the 2nd nixie as well
+
+    switch (op) {
+        case '*':
+            op = 'x';
+            break;
+
+        case '/':
+            op = '÷'
+            break;
+        default:
+            break;
+    }
+    nixieTubeNums[0].textContent = op; //update the op symbol
+
+    //if use is spamming ops, just update the nixie bg once
+    if (!calculator.chain) {
+        if (calculator.num2.length < 12) {
+            let nixieParent = nixieTubeNums[1].parentNode;
+
+            nixieParent.removeChild(nixieParent.childNodes[0]);
+            nixieParent.removeChild(nixieParent.childNodes[0]);
+
+            makeNixieOffL(nixieParent);
+        }
+
+        let nixieParent = nixieTubeNums[0].parentNode;
+
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+
+        makeNixieOn(nixieParent);
+    }
+}
+
+function displayInNixie(numArray) {
+
+    //erase all bg to nixieOff
+    eraseNixieDisplay();
+    makeNixieDisplay();
+
+    let nixieTubeNums = [...document.querySelectorAll(".nixie-tube-num")];
+    //reverse the list of elements so we can append from the tail end
+    nixieTubeNums.reverse();
+    let reversedNum = Array.from(numArray);
+    reversedNum.reverse();
+
+    let i = 0;
+    for (i; i < reversedNum.length; i++) {
+        nixieTubeNums[i].textContent = reversedNum[i];
+        console.log(reversedNum[i]);
+        //turn on all bg to nixieOn
+        let nixieParent = nixieTubeNums[i].parentNode;
+
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+
+        makeNixieOn(nixieParent);
+
+    }
+
+
+    //turn the nixie left of the biggest digit to nixieOffR
+    //create this reflection effect
+    if (i !== 0 && i < displaySize) {
+        let nixieParent = nixieTubeNums[i].parentNode;
+
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+        nixieParent.removeChild(nixieParent.childNodes[0]);
+
+        makeNixieOffR(nixieParent);
+    }
+
+
 }
