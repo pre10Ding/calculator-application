@@ -2,7 +2,7 @@ body{
     background-color: #010010;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 250px 1fr;
+    grid-template-rows: 180px 1fr;
     align-items: center;
     justify-items: center;
 }
@@ -10,9 +10,11 @@ body{
 
 #nixie-display {
     display: grid;
-    grid-template-columns: repeat(13, 70px);
+    grid-template-columns: repeat(10,70px);
     font-family: 'Exo', sans-serif;
-
+    /* border-bottom:solid 10px #030029; */
+    width:730px;
+    height:130px;
 }
 
 
@@ -38,7 +40,7 @@ body{
     /* width: 180px; */
     /* top:150px; */
     /* left: 355px; */
-     left: -85px; 
+     /* left: 10px;  */
     position: relative;
 }
 #calculator-display {
@@ -57,13 +59,21 @@ body{
     grid-template-rows: repeat(4,60px);;
     grid-gap: 10px;
     align-items: center;
+    justify-items: center;
+    opacity: 50%;
+
+    margin-top: -45px;
+    border: ridge 4px #fd00fe;
+    border-radius: 3px;
+    padding: 30px;
+
 }
 
 .keys {
     border-radius: 5px;
     border:none 1px #00ffd1;
-    width:50px;
-    height: 50px;
+    width:60px;
+    height: 60px;
     background-color:#113c4c;
     color: #ff7b63;
     font-size: 20px;
@@ -80,8 +90,8 @@ body{
     text-shadow:0px 1px 3px #bdf7f9;
     box-shadow: 0px 0px 7px #00ffd1; 
     font-size: 19px;
-    width:48px;
-    height:48px;
+    width:58px;
+    height:58px;
     background-color:#113c4c;
     border:none 1px #00ffd1;
 
@@ -89,6 +99,7 @@ body{
 
 .keys:hover {
     text-shadow:0px 0px 10px #fef900;
+    border:solid 1px #00ffd1;
 
 }
 
@@ -121,7 +132,7 @@ body{
     grid-area: 3/2/4/3;
 }
 #three {
-    grid-area: 3/3/4/5;
+    grid-area: 3/3/4/4;
 }
 #zero {
     grid-area: 4/1/5/2;
@@ -163,4 +174,76 @@ body{
     grid-area: 4/5/5/10;
     border-radius: 5px;
     width:auto;
+    justify-self: normal;
+}
+
+
+
+
+@keyframes blink1 {
+    0%, 10%, 33%, 37%,60%,78%,90% { opacity: .3; } 
+    5%,11%, 28%, 38%, 58%,80%,86%,100% { opacity: 1; }
+}
+
+.blinking1 {
+    animation: blink1 2s infinite;
+}
+
+
+@keyframes blink2 {
+    0%, 10%, 33%, 37%,60%,78%,90% { opacity: .3; } 
+    5%,11%, 28%, 38%, 58%,80%,86%,100% { opacity: 1; }
+}
+
+.blinking2 {
+    animation: blink2 1.5s infinite;
+}
+
+
+@keyframes blink3 {
+    0%, 10%, 33%, 37%,60%,78%,90% { opacity: .3; } 
+    5%,11%, 28%, 38%, 58%,80%,86%,100% { opacity: 1; }
+}
+
+.blinking3 {
+    animation: blink3 3s infinite;
+}
+
+
+@keyframes blink4 {
+    0%, 10%, 33%, 37%,60%,78%,90% { opacity: .3; } 
+    5%,11%, 28%, 38%, 58%,80%,86%,100% { opacity: 1; }
+}
+
+.blinking4 {
+    animation: blink4 1s infinite;
+}
+
+@keyframes blink5 {
+    0%, 10%, 33%, 37%,60% { opacity: .3; } 
+    5%, 28%, 80%,86%,100% { opacity: .8; }
+}
+
+.blinking5 {
+    animation: blink5 2s infinite;
+}
+
+
+@keyframes blink6 {
+    0%, 10%, 33%, 37%,60% { opacity: .3; } 
+    5%, 28%, 80%,86%,100% { opacity: .8; }
+}
+
+.blinking6 {
+    animation: blink6 1s infinite;
+}
+
+
+@keyframes blink7 {
+    0%, 10%, 33%, 37%,60% { opacity: .3; } 
+    5%, 28%, 80%,86%,100% { opacity: .8; }
+}
+
+.blinking7 {
+    animation: blink7 .8s infinite;
 }
