@@ -30,11 +30,20 @@ const nixieOnOpacity = 0.5;
 const nixieOff = 'images/nixieOff.png';
 const nixieOffOpacity = 0.2;
 const nixieLayerSaturation = 2;
-const displaySize = 13;
 
+//screen setup variables
+const nixieWidth = "100px";
+const displaySize = 10;
 const defaultColor = '#010010';
 
 
+//initialize nixie display
+let nixieDisplay = document.querySelector('#nixie-display');
+makeNixieDisplay();
+displayInNixie([0]);
+
+
+//listener eles
 let numKeys = document.querySelectorAll('.num-keys');
 let opKeys = document.querySelectorAll('.op-keys');
 
@@ -44,11 +53,6 @@ let clearKey = document.querySelector('#clear');
 let backspaceKey = document.querySelector('#backspace');
 let answerKey = document.querySelector('.ans-key');
 let negKey = document.querySelector('#negation');
-
-
-//initialize nixie display
-let nixieDisplay = document.querySelector('#nixie-display');
-makeNixieDisplay();
 
 //initialize listeners
 numKeys.forEach(key => {
@@ -73,14 +77,10 @@ negKey.addEventListener("click", handleNeg);
 
 
 
-displayInNixie([0]);
-
-
-
-
 /***************************** listener callbacks *****************************/
 
-//when another number is entered, num = num*10+newNum.
+//keep pushing nums into the array until displaySize is reached. 
+//Also handles direct input after operate, prefix 0s, and decimals.
 function handleNum(e) {
 
     //handle user typing numbers in directly after using the = sign
@@ -163,10 +163,11 @@ function handleOp(e) {
 
 }
 
+//do the math and display it. Setting some flags to facilitate other functionalities
 function handleOperate() {
     if (calculator.op != "" && calculator.num2.length !== 0) {
         calculator.ans = operate(calculator.num1, calculator.num2, calculator.op);
-        setDisplayText(calculator.ans);
+        setDisplayText(calculator.ans); //for debugging, make the invisible element visible in css
         displayInNixie(calculator.ans);
 
         //setup for next round of calculations in case user presses an op right away 
@@ -182,6 +183,7 @@ function handleOperate() {
 
 }
 
+//clear everything except ans
 function handleAC() {
     allClear();
     setDisplayText(calculator.num2);
@@ -189,6 +191,7 @@ function handleAC() {
 
 }
 
+//clear just the currently shown value
 function handleC() {
     calculator.num2 = [];
     setDisplayText(calculator.num2);
@@ -197,7 +200,7 @@ function handleC() {
 
 }
 
-
+//pop the last array ele in calc.num2
 function handleBackspace() {
     if (calculator.equalsFlag === 0) {
         calculator.num2.pop();
@@ -207,6 +210,7 @@ function handleBackspace() {
     }
 }
 
+//grab the stored answer from the last operate call and replace calc.num2 with it.
 function handleAns() {
     //if there is an answer to draw from, change the cur num to it, else do nothing
     if (calculator.ans) {
@@ -218,11 +222,11 @@ function handleAns() {
 }
 
 //negation
-//convert num2 into int then * -1
+//convert num2 or num1 into int then * -1
 //do precision on it for displaySize -1
-//convert back to array, store in num2, displayNixie
-
+//convert back to array, store in num2 or num2, displayNixie it
 function handleNeg() {
+    //if an operate has just completed, the num on screen is stored in calc.num1, so we do this on num1
     if (calculator.equalsFlag) {
         let a = negateNum(calculator.num1);
         if(isNaN(a)) {
@@ -233,6 +237,7 @@ function handleNeg() {
 
         displayInNixie(calculator.num1);
     }
+    //under normal circumstances, the num on screen is stored in calc.num2, so we do this on num2
     else {
         let a = negateNum(calculator.num2);
         if(isNaN(a)) {
@@ -246,6 +251,7 @@ function handleNeg() {
 
 }
 
+// +/- a number and check it against displaySize
 function negateNum(target) {
     let a = parseFloat(target.join(''));
     //console.log(target.join(''));
@@ -270,7 +276,8 @@ function setDisplayText(num) {
     return 1;
 }
 
-//this may get refactored into just displayOps(op)
+//keeping this for debugging calculator window. Make invisible ele visible in css
+//this may get refactored into just displayOps(op). Its only visible function is to call displayOp(op).
 function setDisplayColor(op) {
 
     let display = document.querySelector("#calculator-display");
@@ -307,15 +314,18 @@ function setDisplayColor(op) {
 
 
 /********************************** functional ********************************/
+//probably unecessary...
 function convertToArray(num) {
     return ((num) + "").split('');
 }
 
+//
 function allClear() {
     calculator.allClear();
-    setDisplayColor('=');
+    setDisplayColor('='); ///for debugging purposes
 }
 
+//handles math
 function operate(num1, num2, op) {
 
     let a = parseFloat(num1.join(''));
@@ -348,17 +358,18 @@ function operate(num1, num2, op) {
     return convertToArray(result);
 }
 
+//takes a number to check and trim it against the max display size
 function checkDisplaySize(result) {
     let resultArray = convertToArray(result);
     //console.log(resultArray);
-    if (resultArray.length > 12) {
+    if (resultArray.length > displaySize-1) {
         //if scientific notation in result, round to displaySize - 6 (since 1 is reserved for op)
         if (resultArray.indexOf('e' != -1)) {
             result = result.toPrecision(displaySize - 7);
             //console.log(displaySize - 5);
         }
         //if no decimal in result, round to displaySize - 1 (since 1 is reserved for op)
-        else if (resultArray.indexOf('.') == -2) {
+        else if (resultArray.indexOf('.') == -1) {
             result = result.toPrecision(displaySize - 2);
             //console.log(displaySize);
 
@@ -392,7 +403,7 @@ function divide(a, b) {
 
 /********************************** Nixie Tube *******************************/
 
-
+//different combinations of backdrops listed here to ease of access
 function makeNixieOff(ele) {
     makeNixieLayer(ele, nixieB, nixieBOpacity);
     makeNixieLayer(ele, nixieOff, nixieOffOpacity);
@@ -423,17 +434,16 @@ function makeNixieLayer(ele, path, opacity) {
     let img1 = document.createElement("img");
     img1.setAttribute("src", path);
     img1.setAttribute("class", "nixie-images");
-    img1.style.width = "100px";
+    img1.style.width = nixieWidth;
     img1.style.position = 'absolute';
-    img1.style.opacity = opacity; // ~GIMP value * 10 to 15
+    img1.style.opacity = opacity; // ~GIMP value times 10 or 15 looks about right
     img1.style.filter = `saturate(${nixieLayerSaturation})`; //2 seems about right
     ele.appendChild(img1);
 }
 
 
+//setup the divs, spans and images in the nixie tube display
 function makeNixieDisplay() {
-
-
     for (let i = 0; i < displaySize; i++) {
 
         //make the nixie tube back drop
@@ -450,16 +460,16 @@ function makeNixieDisplay() {
     }
 }
 
+//delete everything in the display wrapper
 function eraseNixieDisplay() {
     nixieDisplay.querySelectorAll('*').forEach(n => n.remove());
 }
 
-//get these nixie-tube divs into an array
-//somehow append numbers from the last digit to the last div until there is no more
-
+//display the current operation symbol in the left most nixie and us the appropriate bgs
 function displayOp(op) {
     let nixieTubeNums = [...document.querySelectorAll(".nixie-tube-num")];
 
+    //multiply and divid have dif symbols than what computer uses
     switch (op) {
         case '*':
             op = 'x';
@@ -471,27 +481,27 @@ function displayOp(op) {
         default:
             break;
     }
-    nixieTubeNums[0].textContent = op; //update the op symbol
-    //if use is spamming ops, just update the nixie bg once
+    nixieTubeNums[0].textContent = op; //update and show the op symbol
+    //if user is spamming ops, just update the nixie bg once (dont do the following code)
     if (!calculator.chain) {
 
-        //test if num2 has max digits, if not turn on the 2nd nixie as well
+        //test if num2 has max digits, if not turn on the left side of the 2nd nixie as well
+        //to get the effect of a reflection
         if (calculator.num2.length < displaySize - 1) {
             let nixieParent = nixieTubeNums[1].parentNode;
 
-            eraseNixieElements(nixieParent)
-
+            eraseNixieElements(nixieParent); //function that gets rid of any img element
             makeNixieOffL(nixieParent);
         }
 
         let nixieParent = nixieTubeNums[0].parentNode;
-
         eraseNixieElements(nixieParent)
-
         makeNixieOn(nixieParent);
     }
 }
 
+//get these nixie-tube divs into an array
+//somehow append numbers from the last digit to the last div until there is no more
 function displayInNixie(numArray) {
 
     //erase all bg to nixieOff
@@ -531,6 +541,7 @@ function displayInNixie(numArray) {
 
 }
 
+//erase all img elements in nixie-display
 function eraseNixieElements(nixieParent) {
     let nixieImages = nixieParent.querySelectorAll(".nixie-images");
 
