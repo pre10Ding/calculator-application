@@ -42,6 +42,10 @@ let nixieDisplay = document.querySelector('#nixie-display');
 makeNixieDisplay();
 displayInNixie([0]);
 
+let flickerOn = true;
+if (flickerOn) {
+    blinkRandom();
+}
 
 //listener eles
 let numKeys = document.querySelectorAll('.num-keys');
@@ -90,9 +94,12 @@ function handleNum(e) {
     }
 
     let newNum = e.target.getAttribute("data-key");
+    console.log(newNum);
+    console.log(e);
+
 
     //check if array is empty and the first entry is zero, ignore it
-    if(calculator.num2.length < 1){
+    if (calculator.num2.length < 1) {
         if (newNum == 0) {
             return 0;
         }
@@ -101,7 +108,7 @@ function handleNum(e) {
         }
     }
     //check if a decimal already exist in the array; if so, do nothing
-    if (calculator.num2.length < displaySize-2 && (newNum != "." || calculator.num2.indexOf(".") == -1)) {
+    if (calculator.num2.length < displaySize - 2 && (newNum != "." || calculator.num2.indexOf(".") == -1)) {
 
         calculator.num2.push(newNum);
         displayInNixie(calculator.num2);
@@ -229,7 +236,7 @@ function handleNeg() {
     //if an operate has just completed, the num on screen is stored in calc.num1, so we do this on num1
     if (calculator.equalsFlag) {
         let a = negateNum(calculator.num1);
-        if(isNaN(a)) {
+        if (isNaN(a)) {
             return 0;
         }
         calculator.num1 = convertToArray(a);
@@ -240,7 +247,7 @@ function handleNeg() {
     //under normal circumstances, the num on screen is stored in calc.num2, so we do this on num2
     else {
         let a = negateNum(calculator.num2);
-        if(isNaN(a)) {
+        if (isNaN(a)) {
             return 0;
         }
         calculator.num2 = convertToArray(a);
@@ -257,7 +264,7 @@ function negateNum(target) {
     //console.log(target.join(''));
     //console.log(a);
     a = a * (-1);
-    
+
     //console.log(a);
     a = checkDisplaySize(a);
     return a;
@@ -362,7 +369,7 @@ function operate(num1, num2, op) {
 function checkDisplaySize(result) {
     let resultArray = convertToArray(result);
     //console.log(resultArray);
-    if (resultArray.length > displaySize-1) {
+    if (resultArray.length > displaySize - 1) {
         //if scientific notation in result, round to displaySize - 6 (since 1 is reserved for op)
         if (resultArray.indexOf('e' != -1)) {
             result = result.toPrecision(displaySize - 7);
@@ -485,15 +492,11 @@ function displayOp(op) {
     //if user is spamming ops, just update the nixie bg once (dont do the following code)
     if (!calculator.chain) {
 
-        //test if num2 has max digits, if not turn on the left side of the 2nd nixie as well
-        //to get the effect of a reflection
-        if (calculator.num2.length < displaySize - 1) {
-            let nixieParent = nixieTubeNums[1].parentNode;
+        //make a reflection on the node right of ops
+        let nixieParent1 = nixieTubeNums[1].parentNode;
+        makeNixieLayer(nixieParent1, nixieL, nixieLROpacity);
 
-            eraseNixieElements(nixieParent); //function that gets rid of any img element
-            makeNixieOffL(nixieParent);
-        }
-
+        //light up the ops node
         let nixieParent = nixieTubeNums[0].parentNode;
         eraseNixieElements(nixieParent)
         makeNixieOn(nixieParent);
@@ -548,4 +551,66 @@ function eraseNixieElements(nixieParent) {
     Array.prototype.forEach.call(nixieImages, function (node) {
         node.parentNode.removeChild(node);
     });
+}
+
+function blinkRandom() {
+    //make an array of DOM for span and .nixie-tube-num
+
+    //loop
+    setInterval(function () {
+
+        let i = 0;
+        if (Math.random() > 0.1) {
+
+            let blinkingEles = [...document.querySelectorAll(".nixie-tube-num")];
+
+            blinkingEles.forEach(ele => {
+                if (Math.random() > 0.3) {
+                    ele.classList.remove("blinking1");
+                    ele.classList.remove("blinking2");
+                    ele.classList.remove("blinking3");
+                    ele.classList.remove("blinking4");
+                    ele.classList.remove("blinking5");
+                    ele.classList.remove("blinking6");
+                    ele.classList.remove("blinking7");
+
+
+                }
+            })
+
+            if (Math.random() > 0.4) {
+
+                let numOfChosen = getRandomInt(0, 3);
+                for (let i = 0; i < numOfChosen; i++) {
+                    chosenEle = blinkingEles[getRandomInt(0, blinkingEles.length)];
+                    chosenEle.classList.toggle(`blinking${getRandomInt(1, 8)}`);
+                    console.log(chosenEle);
+                }
+
+                if(Math.random() > 0.4) {
+                    let firstDigit = blinkingEles[displaySize-1];
+                    firstDigit.classList.toggle(`blinking${getRandomInt(1, 8)}`);
+                }
+            }
+
+
+        }
+    }, getRandomInt(500, 2000));
+
+    //every 3-10 seconds
+    //randomly select 0-3 elements
+    //per element
+    //wait 1-3 seconds
+    //randomly select an animation
+    //append the animation class chosen to the element
+    //remove the animation class after 1-3 seconds
+
+}
+
+
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
