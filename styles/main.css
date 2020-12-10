@@ -1,5 +1,9 @@
+:root {
+    --main-bg-color: #010010;
+  }
+
 body{
-    background-color: #010010;
+    background-color: var(--main-bg-color);
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 180px 1fr;
@@ -247,4 +251,11 @@ body{
 .blinking7 {
     animation: blink7 .8s infinite;
 }
+
+
+@keyframes blink1 {
+    0%, 10%, 33%, 37%,60%,78%,90% { opacity: .3; } 
+    5%,11%, 28%, 38%, 58%,80%,86%,100% { opacity: 1; }
+}
+
 
