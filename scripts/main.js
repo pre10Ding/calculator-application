@@ -80,6 +80,10 @@ answerKey.addEventListener("click", handleAns);
 negKey.addEventListener("click", handleNeg);
 
 
+//Keyboard support
+document.addEventListener('keydown', handleKeyboardDown);
+
+document.addEventListener('keyup', handleKeyboardUp);
 
 /***************************** listener callbacks *****************************/
 
@@ -268,6 +272,71 @@ function negateNum(target) {
     //console.log(a);
     a = checkDisplaySize(a);
     return a;
+}
+
+//keyboard input support
+
+let keysHeldDown = {}; //store pairs of keycode:button ref;
+
+function handleKeyboardDown(e) {
+    let triggeredKey = e.key;
+    let triggeredKeycode = e.keyCode;
+    let triggeredButton;
+
+    //handle num keys,op keys, '=', '.'
+    if (triggeredKey > -1 && triggeredKey < 10 ||
+        triggeredKey === '=' ||
+        triggeredKey === '+' ||
+        triggeredKey === '-' ||
+        triggeredKey === '/' ||
+        triggeredKey === '*' ||
+        triggeredKey === '.'
+    ) {
+        triggeredButton = document.querySelector(`button[data-key="${triggeredKey}"]`);
+
+    }
+    //handle ENTER
+    else if (triggeredKey === "Enter") {
+        triggeredButton = document.querySelector(`button[data-key="="]`);
+    }
+    //handle DELETE
+    else if (triggeredKey === "Delete") {
+        triggeredButton = document.querySelector(`button[data-key="C"]`);
+    }
+    //handle BACKSPACE
+    else if (triggeredKey === "Backspace") {
+        triggeredButton = document.querySelector(`button[data-key="backspace"]`);
+    }
+    //handle ESCAPE
+    else if (triggeredKey === "Escape") {
+        triggeredButton = document.querySelector(`button[data-key="AC"]`);
+    }
+    //handle NEGATION (use 'N' or 'P' key?)
+    else if (triggeredKeycode === 78 || triggeredKeycode === 80) {
+        triggeredButton = document.querySelector(`button[data-key="neg"]`);
+    }
+    //handle ANSWER (use 'A' key?)
+    else if (triggeredKeycode === 65) {
+        triggeredButton = document.querySelector(`button[data-key="Ans"]`);
+    }
+    else { //ignore all other keys
+        return 0;
+    }
+    //putting the keys pressed into an object so that we wont need to search for it again
+    //when removing the .active css class
+    keysHeldDown[triggeredKeycode] = triggeredButton;
+    triggeredButton.classList.add('active'); //make the pressed down effect
+    triggeredButton.click(); //triggers calculator functions
+}
+
+//find the keycode of the event and get the button ref from keysHeldDown obj to remove the
+//.active css class
+function handleKeyboardUp(e) {
+    if (keysHeldDown.hasOwnProperty(e.keyCode)) { //check if the corresponding property exists
+        let triggeredButton = keysHeldDown[e.keyCode];
+        triggeredButton.classList.remove('active');
+        delete keysHeldDown[e.keyCode];
+    }
 }
 
 /************************************** UI ***************************************/
@@ -587,15 +656,15 @@ function blinkRandom() {
                     console.log(chosenEle);
                 }
 
-                if(Math.random() > 0.4) {
-                    let firstDigit = blinkingEles[displaySize-1];
+                if (Math.random() > 0.4) {
+                    let firstDigit = blinkingEles[displaySize - 1];
                     firstDigit.classList.toggle(`blinking${getRandomInt(1, 8)}`);
                 }
             }
 
 
         }
-    }, getRandomInt(500, 2000));
+    }, getRandomInt(200, 2000));
 
     //every 3-10 seconds
     //randomly select 0-3 elements
